@@ -10,7 +10,12 @@ function setup() {
 
 // ------- draw ------- //
 function draw() {
-   network.draw();
+   if(network.running == false){
+      network.draw();
+   }
+   else {
+      network.newDraw();
+   }
 }
 
 // ------- mouse click ------- //
@@ -18,8 +23,8 @@ function mouseClicked() {
    if (mouseOnCanvas()) {
       network.createVertex(mouseX, mouseY);
    }
-   if (!mouseOnCanvas()) {
-
+   else {
+      network.run();
    }
 }
 
@@ -28,22 +33,110 @@ class Network {
    constructor() {
       this.vertices = [];
       this.edges = [];
-      this.running = false;
-      this.maxVertices = 20;
+      this.minSpanningTree = [];
+
+      this.maxVertices = 40;
       this.minDist = 15;
+
+      this.maxIndex = 0;
+      this.counter = 0;
+      this.running = false;
+   }
+
+   log(){
+      console.log(this.edges);
    }
 
    // draws the network 
-   draw(){
+   draw() {
+      if (this.vertices.length > 0) {
+         this.vertices[0].color = 'red';
+      }
       this.vertices.forEach(vertex => vertex.show());
-      // this.edges.forEach(edge => edge.show());
-   } 
+   }
+
+   newDraw() {
+      if (this.vertices.length > 0) {
+         this.vertices[0].color = 'red';
+      }
+      this.vertices.forEach(vertex => vertex.show());
+
+      if (this.counter == 0) {
+         this.counter = 5;
+         this.maxIndex++;
+      }
+      else {
+         this.counter--;
+      }
+
+      if (this.maxIndex < this.vertices.length) {
+         for (let i = 0; i < this.maxIndex; i++) {
+            this.minSpanningTree[i].show();
+         }
+      }
+   }
+
+   run() {
+      this.running = true;
+      this.sort();
+      let totalVertices = this.vertices.length;
+      let chosenEdges = [];
+      let chosenVertices = [];
+      let considerdEdges = [];
+      let origin = this.vertices[0];
+
+      chosenVertices.push(origin);
+      considerdEdges.push(...origin.edges);
+
+      while (chosenVertices.length < totalVertices) {
+
+         // get best edge of considered edges
+         let chosenEdge;
+         for(let i=0; i<considerdEdges.length; i++){
+            let edge = considerdEdges[i]; 
+            if( !chosenVertices.includes(edge.v1) || !chosenVertices.includes(edge.v2)){
+               chosenEdge = edge;
+               considerdEdges.splice(i, 1);
+               break;
+            }
+         }
+         chosenEdges.push(chosenEdge);
+         
+         // get the vertex that isnt already chosen
+         let chosenVertex;
+         if (chosenVertices.includes(chosenEdge.v1)) {
+            chosenVertex = chosenEdge.v2;
+         } else {
+            chosenVertex = chosenEdge.v1;
+         }
+         chosenVertices.push(chosenVertex);
+
+         // add all edges that arent considered and arent chosen
+         chosenVertex.edges.forEach(edge => {
+            if (!considerdEdges.includes(edge) && !chosenEdges.includes(edge)) {
+               if (!chosenVertices.includes(edge.v1) || !chosenVertices.includes(edge.v2)) {
+                  considerdEdges.push(edge);
+               }
+            }
+         });
+
+         // sort considered
+         considerdEdges.sort((a, b) => a.distance - b.distance);
+      }
+      this.minSpanningTree = chosenEdges.splice(0);
+   }
+
+   sort() {
+      this.vertices.forEach(vertex => vertex.sortEdges());
+      this.edges.sort((a, b) => a.distance - b.distance);
+   }
 
    // creates a new vertex 
    createVertex(x, y) {
       if (!this.running && this.vertices.length < this.maxVertices) {
          if (this.checkCollisions(x, y)) {
             let vertex = new Vertex(x, y);
+            vertex.id = this.vertices.length;
             this.createEdges(vertex);
             this.vertices.push(vertex);
          }
@@ -53,31 +146,12 @@ class Network {
    // creates new edges for a vertex
    createEdges(newVertex) {
       this.vertices.forEach(vertex => {
-         this.addEdge(new Edge(newVertex, vertex));
+         let edge = new Edge(newVertex, vertex);
+         edge.id = this.edges.length;
+         vertex.edges.push(edge);
+         newVertex.edges.push(edge);
+         this.edges.push(edge);
       });
-   }
-
-   // adds the edge to the proper place in the array
-   addEdge(edge) {
-      let l = this.edges.length;
-
-      if (l < 1) {
-         this.edges.push(edge);
-         return;
-      }
-      else if (edge.distance > this.edges[l - 1].distance){
-         this.edges.push(edge);
-         return;
-      }
-      else {
-         for (let i = 0; i < l; i++) {
-            if (edge.distance < this.edges[i].distance) {
-               this.edges.splice(i, 0, edge);
-               return;
-            }
-         }
-      }
-      console.error("the end of this function should never be reached");
    }
 
    // returns false if a given coordiante is too close to any vertices
@@ -89,6 +163,16 @@ class Network {
       }
       return true;
    }
+
+   connectedEdges(vertex) {
+      let connectedEdges = [];
+      this.edges.forEach(edge => {
+         if (edge.connectsTo(vertex)) {
+            connectedEdges.push(edge);
+         }
+      });
+      return connectedEdges;
+   }
 }
 
 // ------- vertex ------- //
@@ -96,14 +180,19 @@ class Vertex {
    constructor(x, y) {
       this.x = x;
       this.y = y;
-      this.edges = [];
       this.radius = 5;
       this.color = color(24, 209, 17);
+      this.edges = [];
+      this.id;
    }
 
    show() {
       fill(this.color);
       circle(this.x, this.y, this.radius * 2);
+   }
+
+   sortEdges() {
+      this.edges.sort((a, b) => a.distance - b.distance);
    }
 }
 
@@ -114,14 +203,18 @@ class Edge {
       this.v2 = v2;
       this.distance = dist(this.v1.x, this.v1.y, this.v2.x, this.v2.y);
       this.color = color(24, 209, 17);
+      this.id;
    }
 
-   show(){
+   show() {
       stroke(this.color);
       line(this.v1.x, this.v1.y, this.v2.x, this.v2.y);
    }
-}
 
+   connectsTo(vertex) {
+      return (this.v1 == vertex || this.v2 == vertex);
+   }
+}
 
 // ------- helper functions ------- //
 // return true if the mouse is within the bounds of the canvas
@@ -129,22 +222,6 @@ function mouseOnCanvas() {
    return (mouseX < width && mouseX > 0 && mouseY < height && mouseY > 0);
 }
 
-function sortedAdd(num, array) {
-   let newArray = array.splice(0);
-   let l = newArray.length;
-
-   if (l < 1) {
-      newArray.push(num);
-      return newArray;
-   }
-   else {
-      for (let i = 0; i < l; i++) {
-         if (num < newArray[i]) {
-            newArray.splice(i, 0, num);
-            return newArray;
-         }
-      }
-      newArray.push(num);
-      return newArray;
-   }
+function sleep(ms) {
+   return new Promise(r => setTimeout(r, ms));
 }
