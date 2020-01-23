@@ -89,8 +89,8 @@ class Network {
       let total = 0;
       let limit = 1000;
       while (total < max && limit > 0) {
-         let x = Math.random() * width;
-         let y = Math.random() * height;
+         let x = (15 + Math.random() * (width - 30));
+         let y = (15 + Math.random() * (height - 30));
          if (this.createVertex(x, y)) {
             total++;
          }
