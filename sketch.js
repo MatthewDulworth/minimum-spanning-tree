@@ -10,6 +10,7 @@ function setup() {
 
 // ------- draw ------- //
 function draw() {
+   background(0);
    if(network.running == false){
       network.draw();
    }
@@ -49,19 +50,11 @@ class Network {
 
    // draws the network 
    draw() {
-      if (this.vertices.length > 0) {
-         this.vertices[0].color = 'red';
-      }
       this.vertices.forEach(vertex => vertex.show());
    }
 
    newDraw() {
-      if (this.vertices.length > 0) {
-         this.vertices[0].color = 'red';
-      }
-      this.vertices.forEach(vertex => vertex.show());
-
-      if (this.counter == 0) {
+      if (this.counter == 0 && this.maxIndex < this.vertices.length) {
          this.counter = 5;
          this.maxIndex++;
       }
@@ -69,11 +62,16 @@ class Network {
          this.counter--;
       }
 
-      if (this.maxIndex < this.vertices.length) {
+      if(this.maxIndex == this.vertices.length){
+         this.minSpanningTree.forEach(edge => edge.show());
+      }
+      else if (this.maxIndex < this.vertices.length) {
          for (let i = 0; i < this.maxIndex; i++) {
             this.minSpanningTree[i].show();
          }
       }
+
+      this.vertices.forEach(vertex => vertex.show());
    }
 
    run() {
@@ -187,6 +185,7 @@ class Vertex {
    }
 
    show() {
+      stroke(this.color);
       fill(this.color);
       circle(this.x, this.y, this.radius * 2);
    }
