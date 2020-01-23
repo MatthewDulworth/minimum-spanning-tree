@@ -5,6 +5,7 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300&display=swap" rel="stylesheet">
    <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.min.js" async></script>
    <script src="sketch.js" defer></script>
    <title>Minimum Spanning Tree</title>
@@ -12,15 +13,40 @@
 
 <style>
    body{
+      font-family: 'Open Sans', sans-serif;
       height: 100vh;
-      display: grid;
-      place-items: center center;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+   }
+
+   .info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+   }
+
+   hr {
+      width: 800px;
    }
 </style>
 
 <body>
-   <div class="cnavas-wrapper"></div>
-   <div class="info"></div>
+   <div class="info">
+      <h1>Minimum Spanning Tree With Prim's Algorithim</h1>
+      <div>
+         <p>This sketch is a visualization of a minimum spanning tree using my own implementation of Prim's Algorithim.</p>
+      </div>
+      <hr>
+      <div>
+         <button>Create Random Points</button>
+         <button>Run</button>
+         <button>Reset</button>
+      </div>
+   </div>
+   <div class="canvas-wrapper"></div>
 </body>
 
 </html>

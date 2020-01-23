@@ -1,17 +1,36 @@
-// ------ vars ------ //
-let canvas, network;
+// ------ elements ------ //
+let canvas, canvasWrapper;
+
+// ------ vars ------ // 
+let network;
 
 // ------- setup ------- //
 function setup() {
-   canvas = createCanvas(1000, 700);
+   canvas = createCanvas(0, 0);
+   sizeCanvas(canvas);
+
+   canvasWrapper = document.querySelector(".canvas-wrapper");
+   canvas.parent(canvasWrapper);
+
    background(0);
    network = new Network();
+}
+
+// ------- resize ------- // 
+function windowResized() {
+   sizeCanvas();
+}
+
+function sizeCanvas() {
+   let w = windowWidth - 20;
+   let h = windowHeight * 0.7;
+   resizeCanvas(w, h);
 }
 
 // ------- draw ------- //
 function draw() {
    background(0);
-   if(network.running == false){
+   if (network.running == false) {
       network.draw();
    }
    else {
@@ -44,7 +63,7 @@ class Network {
       this.running = false;
    }
 
-   log(){
+   log() {
       console.log(this.edges);
    }
 
@@ -62,7 +81,7 @@ class Network {
          this.counter--;
       }
 
-      if(this.maxIndex == this.vertices.length){
+      if (this.maxIndex == this.vertices.length) {
          this.minSpanningTree.forEach(edge => edge.show());
       }
       else if (this.maxIndex < this.vertices.length) {
@@ -90,16 +109,16 @@ class Network {
 
          // get best edge of considered edges
          let chosenEdge;
-         for(let i=0; i<considerdEdges.length; i++){
-            let edge = considerdEdges[i]; 
-            if( !chosenVertices.includes(edge.v1) || !chosenVertices.includes(edge.v2)){
+         for (let i = 0; i < considerdEdges.length; i++) {
+            let edge = considerdEdges[i];
+            if (!chosenVertices.includes(edge.v1) || !chosenVertices.includes(edge.v2)) {
                chosenEdge = edge;
                considerdEdges.splice(i, 1);
                break;
             }
          }
          chosenEdges.push(chosenEdge);
-         
+
          // get the vertex that isnt already chosen
          let chosenVertex;
          if (chosenVertices.includes(chosenEdge.v1)) {
