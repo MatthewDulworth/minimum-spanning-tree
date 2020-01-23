@@ -12,7 +12,7 @@
 </head>
 
 <style>
-   body{
+   body {
       font-family: 'Open Sans', sans-serif;
       height: 100vh;
       margin: 0;
@@ -25,19 +25,22 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 20px;
-   }
-
-   hr {
-      width: 800px;
+      margin-bottom: 13px;
    }
 </style>
 
 <body>
    <div class="info">
       <h1>Minimum Spanning Tree With Prim's Algorithim</h1>
-      <div>
-         <p>This sketch is a visualization of a minimum spanning tree using my own implementation of Prim's Algorithim.</p>
+      <div class="description">
+         <p>
+            This sketch is a visualization of a minimum spanning tree using my own implementation of Prim's Algorithim.
+            A minimum spanning tree is the the shortest path to connect all vertices in a graph. Prim's Algorithim
+            accomplishes this using the following steps. First it chooses any vertice as the origin. Then it chooses the closest vertice to the origin and adds it to the tree. After that it continually adds the next closest vertice to any other vertice already in the tree until all vertices are connected.
+         </p>
+         <p>
+            Click anywhere on the canvas to add a vertice.
+         </p>
       </div>
       <hr>
       <div>

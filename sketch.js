@@ -1,5 +1,6 @@
 // ------ elements ------ //
 let canvas, canvasWrapper;
+let resetBtn, runBtn, randomBtn;
 
 // ------ vars ------ // 
 let network;
@@ -12,19 +13,42 @@ function setup() {
    canvasWrapper = document.querySelector(".canvas-wrapper");
    canvas.parent(canvasWrapper);
 
+   sizeElem();
+   initBtns();
+
    background(0);
    network = new Network();
+}
+
+// ------- init buttons ------- // 
+function initBtns() {
+   randomBtn = document.querySelector("button:nth-of-type(1)");
+   runBtn = document.querySelector("button:nth-of-type(2)");
+   resetBtn = document.querySelector("button:nth-of-type(3)");
+
+   randomBtn.addEventListener('click', e => network.randomPoints());
+   runBtn.addEventListener('click', e => network.run());
+   resetBtn.addEventListener('click', e => network = new Network());
 }
 
 // ------- resize ------- // 
 function windowResized() {
    sizeCanvas();
+   sizeElem();
 }
 
+// ------- hr style ------- // 
+function sizeElem() {
+   document.querySelector("hr").style.width = (windowWidth * 0.7) + "px";
+   document.querySelector(".description").style.width = (windowWidth * 0.7) + "px";
+}
+
+// ------- canvas size ------- //
 function sizeCanvas() {
-   let w = windowWidth - 20;
-   let h = windowHeight * 0.7;
+   let w = windowWidth * 0.7;
+   let h = windowHeight * 0.6;
    resizeCanvas(w, h);
+   network = new Network();
 }
 
 // ------- draw ------- //
@@ -43,9 +67,6 @@ function mouseClicked() {
    if (mouseOnCanvas()) {
       network.createVertex(mouseX, mouseY);
    }
-   else {
-      network.run();
-   }
 }
 
 // ------- network ------- // 
@@ -61,6 +82,20 @@ class Network {
       this.maxIndex = 0;
       this.counter = 0;
       this.running = false;
+   }
+
+   randomPoints() {
+      let max = this.maxVertices - this.vertices.length;
+      let total = 0;
+      let limit = 1000;
+      while (total < max && limit > 0) {
+         let x = Math.random() * width;
+         let y = Math.random() * height;
+         if (this.createVertex(x, y)) {
+            total++;
+         }
+         limit--;
+      }
    }
 
    log() {
@@ -94,6 +129,10 @@ class Network {
    }
 
    run() {
+      if(this.vertices.length === 0){
+         return;
+      }
+
       this.running = true;
       this.sort();
       let totalVertices = this.vertices.length;
@@ -156,8 +195,10 @@ class Network {
             vertex.id = this.vertices.length;
             this.createEdges(vertex);
             this.vertices.push(vertex);
+            return true;
          }
       }
+      return false;
    }
 
    // creates new edges for a vertex
